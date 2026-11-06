@@ -1,5 +1,9 @@
 # jetson-orin-agx-hil-dreamzero
 
+![HIL setup: laptop with Isaac Sim connected to a Jetson AGX Orin running DreamZero](docs/assets/hil-setup.svg)
+
+Project page: https://kabilankb.github.io/jetson-orin-agx-hil-dreamzero/
+
 Hardware-in-the-loop for **NVIDIA DreamZero-DROID** with the policy running on a **Jetson AGX Orin 64GB** and a
 Franka + Robotiq DROID scene in **Isaac Sim 6 / Isaac Lab 3** on a laptop.
 
@@ -121,6 +125,7 @@ jetson/
   dz_lowmem.py         streaming bf16 loader + text-encoder offload
   run_dreamzero_server.sh  download_checkpoint.sh  ethernet_routes.sh  requirements-jetson.txt
 docs/TROUBLESHOOTING.md
+docs/index.html       GitHub Pages site; docs/gen_hero_svg.py regenerates docs/assets/hil-setup.svg
 ```
 
 ## Licenses
