@@ -9,3 +9,4 @@ runs/
 logs/
 *.mp4
 *.safetensors
+!docs/assets/*.mp4
