@@ -1,0 +1,22 @@
+jetson-orin-agx-hil-dreamzero
+Copyright 2026 kabilan kb
+
+This project builds on, and contains code derived from, the following works:
+
+- DreamZero (https://github.com/dreamzero0/dreamzero), NVIDIA GEAR Lab, Apache License 2.0.
+  jetson/apply_patches.py modifies a DreamZero checkout at install time; jetson/dz_lowmem.py
+  replaces DreamZero's VLA.from_pretrained and wraps WANPolicyHead.encode_prompt at runtime.
+  dreamzero_hil/client.py follows the request format of dreamzero eval_utils/run_sim_eval.py and
+  eval_utils/policy_client.py (itself adapted from https://github.com/robo-arena/roboarena).
+  DreamZero model weights (GEAR-Dreams/DreamZero-DROID on Hugging Face) are not included.
+
+- openpi-client (https://github.com/Physical-Intelligence/openpi, packages/openpi-client),
+  Physical Intelligence, Apache License 2.0. dreamzero_hil/_openpi/msgpack_numpy.py and
+  image_tools.py are unmodified copies.
+
+- sim-evals (https://github.com/arhanjain/sim-evals). dreamzero_hil/droid_sim/ is a port of its
+  DROID environment configuration to Isaac Lab 3. sim-evals has no license file at the time of
+  writing; its scene and robot USD assets (Hugging Face owhan/DROID-sim-environments) are not
+  redistributed and are downloaded by scripts/download_assets.sh.
+
+- Isaac Sim / Isaac Lab (NVIDIA) are required at runtime and are not included.

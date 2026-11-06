@@ -1,0 +1,27 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "dreamzero-hil"
+version = "0.1.0"
+description = "Jetson AGX Orin hardware-in-the-loop for NVIDIA DreamZero-DROID: Orin policy server + Isaac Sim 6 DROID sim client"
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
+requires-python = ">=3.10"
+authors = [{ name = "kabilan kb" }]
+keywords = ["jetson", "orin", "dreamzero", "isaac-sim", "isaac-lab", "droid", "hardware-in-the-loop", "robotics"]
+# Client-side deps only. numpy/opencv/torch/gymnasium come from the Isaac Sim / Isaac Lab environment.
+dependencies = [
+  "msgpack>=1.0.5",
+  "numpy",
+  "pillow",
+  "websockets>=12",
+]
+
+[project.urls]
+DreamZero = "https://github.com/dreamzero0/dreamzero"
+
+[tool.hatch.build.targets.wheel]
+packages = ["dreamzero_hil"]
