@@ -4,6 +4,10 @@
 
 Project page: https://kabilankb.github.io/jetson-orin-agx-hil-dreamzero/
 
+[![DreamZero-DROID on the Jetson AGX Orin driving the Isaac Sim DROID scene: the Franka holds the cube above the bowl](docs/assets/dreamzero-orin-sim.jpg)](docs/assets/dreamzero-orin-sim.mp4)
+
+*DreamZero-DROID on the Orin driving the Isaac Sim 6 DROID scene ("put the cube in the bowl"). Click for the video.*
+
 Hardware-in-the-loop for **NVIDIA DreamZero-DROID** with the policy running on a **Jetson AGX Orin 64GB** and a
 Franka + Robotiq DROID scene in **Isaac Sim 6 / Isaac Lab 3** on a laptop.
 

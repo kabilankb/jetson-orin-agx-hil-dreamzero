@@ -64,6 +64,9 @@
   .flow .card { text-align: center; padding: 16px; }
   .flow .arrow { color: var(--blue); font-weight: 800; font-size: 22px; }
   .note { background: var(--blue-soft); border: 1px solid #cfdcf6; color: #1d3f78; border-radius: 12px; padding: 14px 16px; font-size: 15px; }
+.demo { margin: 0; background: var(--card); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+  .demo video { width: 100%; height: auto; display: block; background: #fff; }
+  .demo figcaption { padding: 12px 16px; color: var(--muted); font-size: 14.5px; border-top: 1px solid var(--line); }
   footer { padding: 34px 0 50px; color: var(--muted); font-size: 14px; border-top: 1px solid var(--line); }
   @media (max-width: 820px) {
     .stats { grid-template-columns: repeat(2, 1fr); }
@@ -77,6 +80,7 @@
 <nav>
   <div class="wrap">
     <a class="brand" href="#">Orin<span>HIL</span> · DreamZero</a>
+    <a href="#demo">Demo</a>
     <a href="#results">Results</a>
     <a href="#how">How it works</a>
     <a href="#fixes">Orin fixes</a>
@@ -96,6 +100,17 @@
   </div>
   <div class="hero"><img src="assets/hil-setup.svg" alt="Laptop running Isaac Sim connected over Ethernet to a Jetson AGX Orin running DreamZero"></div>
 </header>
+
+<section id="demo">
+  <div class="wrap">
+    <h2>In action</h2>
+    <p class="sub">Screen capture from the laptop while DreamZero-DROID ran on the Orin (scene 1, “put the cube in the bowl”).</p>
+    <figure class="demo">
+      <video src="assets/dreamzero-orin-sim.mp4" poster="assets/dreamzero-orin-sim.jpg" autoplay muted loop playsinline controls></video>
+      <figcaption>Isaac Sim 6 DROID scene driven by DreamZero-DROID on the Jetson AGX Orin: the Franka holds the cube above the bowl.</figcaption>
+    </figure>
+  </div>
+</section>
 
 <section id="results">
   <div class="wrap">
