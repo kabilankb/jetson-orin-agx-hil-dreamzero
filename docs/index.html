@@ -106,7 +106,11 @@
     <h2>In action</h2>
     <p class="sub">Screen capture from the laptop while DreamZero-DROID ran on the Orin (scene 1, “put the cube in the bowl”).</p>
     <figure class="demo">
-      <video src="assets/dreamzero-orin-sim.mp4" poster="assets/dreamzero-orin-sim.jpg" autoplay muted loop playsinline controls></video>
+      <video poster="assets/dreamzero-orin-sim.jpg" autoplay muted loop playsinline controls preload="auto">
+        <source src="assets/dreamzero-orin-sim.webm?v=2" type="video/webm">
+        <source src="assets/dreamzero-orin-sim.mp4?v=2" type="video/mp4">
+        <a href="assets/dreamzero-orin-sim.mp4">Download the video</a>
+      </video>
       <figcaption>Isaac Sim 6 DROID scene driven by DreamZero-DROID on the Jetson AGX Orin: the Franka holds the cube above the bowl.</figcaption>
     </figure>
   </div>
