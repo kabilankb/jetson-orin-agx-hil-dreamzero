@@ -16,8 +16,12 @@ if ! ssh "$JETSON" "ss -ltn | grep -q ':$PORT '"; then
 fi
 log "waiting for :$PORT (model load ~1 min) ..."
 until ssh -o ConnectTimeout=8 "$JETSON" "ss -ltn | grep -q ':$PORT '"; do
-  if ssh "$JETSON" "grep -qE 'Traceback|OutOfMemory|Killed' ~/$DZ_DIR/logs/server_latest.log"; then
+  if ssh "$JETSON" "grep -qE 'Traceback|OutOfMemory' ~/$DZ_DIR/logs/server_latest.log"; then
     log "server failed:"; ssh "$JETSON" "tail -20 ~/$DZ_DIR/logs/server_latest.log"; exit 1
+  fi
+  # a kernel OOM kill (SIGKILL) leaves nothing in the log: the tmux session just ends
+  if ! ssh "$JETSON" "tmux has-session -t dreamzero 2>/dev/null || ss -ltn | grep -q ':$PORT '"; then
+    log "server exited without an error in its log (likely OOM-killed):"; ssh "$JETSON" "tail -5 ~/$DZ_DIR/logs/server_latest.log"; exit 1
   fi
   sleep 10
 done

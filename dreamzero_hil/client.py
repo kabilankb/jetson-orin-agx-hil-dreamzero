@@ -37,18 +37,34 @@ def _connect(uri: str, open_timeout: float):
 
 
 class PolicyConnection:
-    def __init__(self, host: str, port: int, open_timeout: float = 300.0):
+    # open_timeout covers only the TCP/websocket handshake: a reachable Jetson whose server is still loading
+    # refuses at once, so this only bounds the wait for an unreachable host. The reply has no timeout.
+    def __init__(self, host: str, port: int, open_timeout: float = 30.0):
         self.uri = f"ws://{host}:{port}"
         self._packer = msgpack_numpy.Packer()
-        self._ws = _connect(self.uri, open_timeout)
+        try:
+            self._ws = _connect(self.uri, open_timeout)
+        except (OSError, TimeoutError) as e:
+            raise ConnectionError(f"could not connect to the policy server at {self.uri}: {type(e).__name__}: {e}") from e
         self.server_config = msgpack_numpy.unpackb(self._ws.recv())
+        self.last_timing: dict | None = None
 
     def _call(self, payload: dict):
-        self._ws.send(self._packer.pack(payload))
+        # per-stage timing of the last call: pack -> send -> wait (server + network) -> unpack
+        t0 = time.perf_counter()
+        data = self._packer.pack(payload)
+        t1 = time.perf_counter()
+        self._ws.send(data)
+        t2 = time.perf_counter()
         resp = self._ws.recv()
+        t3 = time.perf_counter()
         if isinstance(resp, str):
             raise RuntimeError(f"Error in inference server:\n{resp}")
-        return msgpack_numpy.unpackb(resp)
+        out = msgpack_numpy.unpackb(resp)
+        t4 = time.perf_counter()
+        self.last_timing = {"pack_s": round(t1 - t0, 4), "send_s": round(t2 - t1, 4), "wait_s": round(t3 - t2, 3),
+                            "unpack_s": round(t4 - t3, 4), "req_bytes": len(data), "resp_bytes": len(resp)}
+        return out
 
     def infer(self, obs: dict):
         return self._call({**obs, "endpoint": "infer"})
@@ -67,8 +83,10 @@ class DreamZeroDroidClient:
     """Turns sim observations into DreamZero requests and serves the returned chunk step by step.
 
     open_loop_horizon: how many of the 24 returned actions to execute before querying again
-    (8 = the dreamzero sim-eval default; 24 = use the whole chunk, ~3x fewer requests).
+    (8 = the dreamzero sim-eval default; 24 = use the whole chunk, ~3x fewer requests). Capped at the chunk length.
     while_waiting: called repeatedly while a request is in flight (e.g. to keep a GUI rendering).
+    last_call: per-request record (round trip, stage timings, sizes) set after each request; the runner
+    logs and clears it.
     """
 
     def __init__(self, host: str, port: int, open_loop_horizon: int = 8,
@@ -78,10 +96,13 @@ class DreamZeroDroidClient:
         self.while_waiting = while_waiting
         self.log = log
         self.timings: list[float] = []
+        self.last_call: dict | None = None
+        self._warned_short = False
         self.reset()
 
     def reset(self):
         self.k = 0
+        self.n_exec = 0  # actions of the current chunk that will be executed: min(horizon, chunk length)
         self.chunk = None
         self.session_id = str(uuid.uuid4())
 
@@ -112,8 +133,9 @@ class DreamZeroDroidClient:
 
     def act(self, obs: dict, prompt: str) -> np.ndarray:
         """obs: right_image, left_image, wrist_image (HxWx3 uint8), joint_position (7,), gripper_position (1,)."""
-        if self.chunk is None or self.k >= self.horizon:
+        if self.chunk is None or self.k >= self.n_exec:
             self.k = 0
+            tp = time.perf_counter()
             req = {
                 "observation/exterior_image_0_left": image_tools.resize_with_pad(obs["right_image"], *IMG_HW),
                 "observation/exterior_image_1_left": image_tools.resize_with_pad(obs["left_image"], *IMG_HW),
@@ -124,19 +146,27 @@ class DreamZeroDroidClient:
                 "prompt": prompt,
                 "session_id": self.session_id,
             }
+            prep_s = time.perf_counter() - tp
             t = time.time()
             res = self._infer_async(req)
             acts = np.asarray(res["actions"] if isinstance(res, dict) else res)
-            if acts.ndim != 2 or acts.shape[-1] != 8:
+            if acts.ndim != 2 or acts.shape[-1] != 8 or len(acts) == 0:
                 raise ValueError(f"expected (N, 8) actions, got {acts.shape}")
             dt = time.time() - t
             self.timings.append(dt)
+            if self.horizon > len(acts) and not self._warned_short:
+                self.log(f"[client] WARNING: open_loop_horizon {self.horizon} > chunk length {len(acts)}; "
+                         f"executing {len(acts)} per request")
+                self._warned_short = True
+            self.n_exec = min(self.horizon, len(acts))
+            self.last_call = {"rtt_s": round(dt, 3), "prep_s": round(prep_s, 4), "chunk_len": int(len(acts)),
+                              "n_exec": self.n_exec, "chunk_bytes": int(acts.nbytes), **(self.conn.last_timing or {})}
             q = np.asarray(obs["joint_position"])
             move = np.abs(acts[:, :7] - q[None]).max(axis=0)
             self.log(f"[client] chunk {acts.shape} in {dt:.1f}s | max joint move {np.round(move, 3).tolist()} rad"
                      f" | gripper {acts[:, 7].min():.2f}..{acts[:, 7].max():.2f}")
             self.chunk = acts
-        a = np.asarray(self.chunk[min(self.k, len(self.chunk) - 1)], dtype=np.float64).copy()
+        a = np.array(self.chunk[self.k], dtype=np.float64)  # copy: msgpack-decoded arrays are read-only
         self.k += 1
         a[-1] = 1.0 if a[-1] > 0.5 else 0.0
         return a

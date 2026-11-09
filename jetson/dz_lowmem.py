@@ -145,6 +145,12 @@ def _te_unload(te):
 
 def _te_reload(te, device):
     t0 = time.time()
+    # The reload needs ~11.4 GB. Memory freed by earlier inference stays in PyTorch's caching allocator, which on
+    # the Orin's unified memory still counts as used, so hand it back first or the kernel OOM-kills the server.
+    gc.collect()
+    torch.cuda.empty_cache()
+    free, total = torch.cuda.mem_get_info()
+    print(f"[dz_lowmem] reloading text encoder: {free / 1e9:.1f} of {total / 1e9:.1f} GB free", flush=True)
     path = _CKPT_PATH["path"]
     params = dict(te.named_parameters())
     with open(os.path.join(path, "model.safetensors.index.json")) as f:
@@ -163,25 +169,41 @@ def _te_reload(te, device):
 
 
 _orig_encode_prompt = _wf.WANPolicyHead.encode_prompt
+_orig_prepare_text_inputs = _wf.WANPolicyHead._prepare_text_inputs
+
+
+def _prepare_text_inputs_counted(self, data):
+    # With CFG one inference encodes the prompt *and* the negative prompt (lazy_joint_video_action:
+    # `[self.encode_prompt(t, m) for t, m in self._prepare_text_inputs(data)]`). Record how many encodes this
+    # pass will make so the encoder is freed after the last one, not reloaded from disk in between (~8 s).
+    inputs = _orig_prepare_text_inputs(self, data)
+    self._dz_encodes_left = len(inputs)
+    return inputs
 
 
 def _encode_prompt_cached(self, input_ids, attention_mask):
+    left = getattr(self, "_dz_encodes_left", 0)
+    self._dz_encodes_left = max(left - 1, 0)
+    last_of_pass = left <= 1  # also true for callers outside _prepare_text_inputs: free right away, as before
+
     h = hashlib.sha1()
     h.update(input_ids.detach().cpu().numpy().tobytes())
     h.update(attention_mask.detach().cpu().numpy().tobytes())
     key = h.hexdigest()
-    if key in _EMB_CACHE:
-        return _EMB_CACHE[key].clone()
     te = self.text_encoder
-    if getattr(te, "_dz_unloaded", False):
-        _te_reload(te, input_ids.device)
-    emb = _orig_encode_prompt(self, input_ids, attention_mask)
-    _EMB_CACHE[key] = emb.detach().clone()
-    print(f"[dz_lowmem] cached prompt embedding {tuple(emb.shape)} ({len(_EMB_CACHE)} cached)", flush=True)
-    if os.environ.get("DZ_TEXT_OFFLOAD", "1") == "1":
+    if key in _EMB_CACHE:
+        emb = _EMB_CACHE[key].clone()
+    else:
+        if getattr(te, "_dz_unloaded", False):
+            _te_reload(te, input_ids.device)
+        emb = _orig_encode_prompt(self, input_ids, attention_mask)
+        _EMB_CACHE[key] = emb.detach().clone()
+        print(f"[dz_lowmem] cached prompt embedding {tuple(emb.shape)} ({len(_EMB_CACHE)} cached)", flush=True)
+    if last_of_pass and not getattr(te, "_dz_unloaded", False) and os.environ.get("DZ_TEXT_OFFLOAD", "1") == "1":
         _te_unload(te)
     return emb
 
 
+_wf.WANPolicyHead._prepare_text_inputs = _prepare_text_inputs_counted
 _wf.WANPolicyHead.encode_prompt = _encode_prompt_cached
 print("[dz_lowmem] text-encoder offload enabled", flush=True)
