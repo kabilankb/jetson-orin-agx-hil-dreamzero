@@ -1,0 +1,271 @@
+{
+  "tasks": [
+    {
+      "scene": 1,
+      "prompt": "put the cube in the bowl",
+      "ep": 0,
+      "success": false,
+      "time_to_success": null,
+      "steps": 64,
+      "sim_s": 4.267,
+      "wall_s": 501.68,
+      "calls": 8,
+      "d_start": 0.2586,
+      "d_end": 0.2586,
+      "min_reach": 0.3397,
+      "moved": 0.0,
+      "lift": 0.0,
+      "max_steps": 64
+    },
+    {
+      "scene": 2,
+      "prompt": "pick up the can and put it in the mug",
+      "ep": 0,
+      "success": false,
+      "time_to_success": null,
+      "steps": 64,
+      "sim_s": 4.267,
+      "wall_s": 525.14,
+      "calls": 8,
+      "d_start": 0.141,
+      "d_end": 0.1411,
+      "min_reach": 0.3833,
+      "moved": 0.0002,
+      "lift": 0.0,
+      "max_steps": 64
+    },
+    {
+      "scene": 3,
+      "prompt": "put the banana in the bin",
+      "ep": 0,
+      "success": false,
+      "time_to_success": null,
+      "steps": 64,
+      "sim_s": 4.267,
+      "wall_s": 524.19,
+      "calls": 8,
+      "d_start": 0.3181,
+      "d_end": 0.3197,
+      "min_reach": 0.397,
+      "moved": 0.0019,
+      "lift": 0.0,
+      "max_steps": 64
+    }
+  ],
+  "pipeline": {
+    "prep_s": null,
+    "pack_s": null,
+    "send_s": null,
+    "server_s": {
+      "n": 24,
+      "mean": 61.863,
+      "p50": 61.699,
+      "p95": 68.553,
+      "min": 57.408,
+      "max": 69.529
+    },
+    "net_s": {
+      "n": 24,
+      "mean": 1.369,
+      "p50": 0.174,
+      "p95": 12.044,
+      "min": 0.077,
+      "max": 14.233
+    },
+    "unpack_s": null,
+    "exec_s": {
+      "n": 21,
+      "mean": 1.405,
+      "p50": 1.34,
+      "p95": 1.513,
+      "min": 1.247,
+      "max": 2.649
+    },
+    "cycle_s": {
+      "n": 21,
+      "mean": 62.783,
+      "p50": 63.265,
+      "p95": 65.952,
+      "min": 59.236,
+      "max": 66.066
+    },
+    "rtt_s": {
+      "n": 24,
+      "mean": 63.232,
+      "p50": 61.907,
+      "p95": 80.551,
+      "min": 57.75,
+      "max": 83.762
+    },
+    "req_bytes": null,
+    "resp_bytes": null,
+    "chunk_len": {
+      "n": 24,
+      "mean": 24.0,
+      "p50": 24.0,
+      "p95": 24.0,
+      "min": 24.0,
+      "max": 24.0
+    },
+    "n_exec": {
+      "n": 24,
+      "mean": 8.0,
+      "p50": 8.0,
+      "p95": 8.0,
+      "min": 8.0,
+      "max": 8.0
+    },
+    "chunk_bytes": null,
+    "rtt_first_s": {
+      "n": 3,
+      "mean": 76.215,
+      "p50": 83.333,
+      "p95": 83.719,
+      "min": 61.55,
+      "max": 83.762
+    },
+    "rtt_steady_s": {
+      "n": 21,
+      "mean": 61.378,
+      "p50": 61.866,
+      "p95": 64.612,
+      "min": 57.75,
+      "max": 64.789
+    }
+  },
+  "server_stages": {
+    "text_encoder": {
+      "n": 24,
+      "mean": 1.099,
+      "p50": 0.0,
+      "p95": 10.439,
+      "min": 0.0,
+      "max": 11.84
+    },
+    "image_encoder": {
+      "n": 24,
+      "mean": 1.224,
+      "p50": 0.0,
+      "p95": 4.819,
+      "min": 0.0,
+      "max": 5.36
+    },
+    "vae": {
+      "n": 24,
+      "mean": 0.766,
+      "p50": 1.02,
+      "p95": 1.03,
+      "min": 0.0,
+      "max": 1.03
+    },
+    "kv_cache": {
+      "n": 24,
+      "mean": 5.895,
+      "p50": 6.615,
+      "p95": 7.018,
+      "min": 3.32,
+      "max": 7.09
+    },
+    "diffusion": {
+      "n": 24,
+      "mean": 52.79,
+      "p50": 52.785,
+      "p95": 56.32,
+      "min": 49.19,
+      "max": 56.44
+    },
+    "model_total": {
+      "n": 24,
+      "mean": 61.82,
+      "p50": 61.66,
+      "p95": 68.524,
+      "min": 57.37,
+      "max": 69.48
+    }
+  },
+  "server_calls_matched": true,
+  "throughput": {
+    "tasks": 3,
+    "successes": 0,
+    "success_rate": 0.0,
+    "total_wall_min": 25.9,
+    "total_sim_s": 12.8,
+    "total_steps": 192,
+    "total_calls": 24,
+    "wall_min_per_task": 8.6,
+    "tasks_per_hour": 6.96,
+    "successes_per_hour": 0.0,
+    "mean_time_to_success_wall_min": null,
+    "mean_time_to_success_sim_s": null,
+    "actions_per_wall_s": 0.127,
+    "real_time_factor": 0.0083,
+    "full_episode_wall_min_est": 59.6
+  },
+  "jetson": {
+    "ram_used_gb": {
+      "n": 1595,
+      "mean": 55.9,
+      "p50": 58.3,
+      "p95": 59.0,
+      "min": 42.8,
+      "max": 59.0
+    },
+    "ram_total_gb": 61.4,
+    "gpu_util_pct": {
+      "n": 1595,
+      "mean": 92.0,
+      "p50": 99.0,
+      "p95": 99.0,
+      "min": 0.0,
+      "max": 100.0
+    },
+    "gpu_soc_power_w": {
+      "n": 1595,
+      "mean": 38.0,
+      "p50": 41.2,
+      "p95": 41.9,
+      "min": 1.6,
+      "max": 42.4
+    },
+    "tj_temp_c": {
+      "n": 1595,
+      "mean": 69.1,
+      "p50": 70.8,
+      "p95": 72.7,
+      "min": 45.6,
+      "max": 73.5
+    }
+  },
+  "laptop_gpu": {
+    "gpu_util_pct": {
+      "n": 1604,
+      "mean": 71.0,
+      "p50": 73.0,
+      "p95": 81.0,
+      "min": 0.0,
+      "max": 100.0
+    },
+    "gpu_mem_mb": {
+      "n": 1604,
+      "mean": 6349.0,
+      "p50": 6381.0,
+      "p95": 6586.0,
+      "min": 523.0,
+      "max": 12205.0
+    },
+    "gpu_power_w": {
+      "n": 1604,
+      "mean": 64.3,
+      "p50": 54.7,
+      "p95": 111.5,
+      "min": 22.6,
+      "max": 113.9
+    }
+  },
+  "server_load_s": 81,
+  "ping_ms": {
+    "min": 2.058,
+    "avg": 9.062,
+    "max": 93.908
+  }
+}

@@ -63,6 +63,10 @@ def patch_server(repo: Path):
         s = s.replace('os.environ["ATTENTION_BACKEND"] = "TE"', 'os.environ.setdefault("ATTENTION_BACKEND", "TE")', 1)
         changed = True
     ast.parse(s)
+    # str.replace() does nothing when upstream moved an anchor, so check that every patch actually landed
+    missing = [m for m in ("dz_lowmem", "DZ_DIST_BACKEND", 'os.environ.setdefault("ATTENTION_BACKEND"') if m not in s]
+    if missing:
+        sys.exit(f"{p}: could not apply {missing}; upstream changed, patch by hand")
     p.write_text(s)
     return "patched" if changed else "already patched"
 

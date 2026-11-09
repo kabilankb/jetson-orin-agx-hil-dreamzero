@@ -39,6 +39,13 @@ SCENES = {
     3: "put the banana in the bin",
 }
 
+# (object to move, target container, success radius in m around the target centre, in the table plane)
+TASKS = {
+    1: ("rubiks_cube", "_24_bowl", 0.07),
+    2: ("_10_potted_meat_can", "_25_mug", 0.05),
+    3: ("_11_banana", "small_KLT_visual_collision", 0.10),
+}
+
 
 def _t(x):
     return x.torch if hasattr(x, "torch") else x

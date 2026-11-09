@@ -1,7 +1,7 @@
 """DROID tabletop env for Isaac Lab 3. Import only after isaaclab.app.AppLauncher has started."""
 import gymnasium as gym
 
-from .env import SCENES, DroidEnvCfg  # noqa: F401
+from .env import SCENES, TASKS, DroidEnvCfg  # noqa: F401
 
 if "DROID-Lab3" not in gym.registry:
     gym.register(
